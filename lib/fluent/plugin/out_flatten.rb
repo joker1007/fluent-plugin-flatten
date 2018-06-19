@@ -17,6 +17,8 @@ module Fluent::Plugin
     config_param :parse_json, :bool, default: true
     desc "Replaces spaces in the resulting tag with the key passed"
     config_param :replace_space_in_tag, :string, default: nil
+    desc "Keep original record"
+    config_param :keep_original_record, :bool, default: false
 
     def configure(conf)
       super
@@ -37,6 +39,9 @@ module Fluent::Plugin
 
         flattened.each do |keypath, value|
           tag_with_keypath = [tag.clone, keypath].join('.')
+          if @keep_original_record
+            value.merge!(record)
+          end
           filter_record(tag_with_keypath, time, value)
           if @replace_space_in_tag
             router.emit(tag_with_keypath.gsub(/\s+/, @replace_space_in_tag), time, value)

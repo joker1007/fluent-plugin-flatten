@@ -78,7 +78,7 @@ class FlattenOutputTest < Test::Unit::TestCase
 
       # XXX work-around
       # fluentd seems to escape json value excessively
-      flattened = d.instance.flatten({ 'foo' => '{\"bar\" : \"baz\"}' })
+      flattened = d.instance.flatten({ "prop1" => "val1", 'foo' => '{\"bar\" : \"baz\"}' })
       assert_equal({ 'foo.bar' => { 'value' => 'baz' } }, flattened)
     end
 
@@ -123,6 +123,28 @@ class FlattenOutputTest < Test::Unit::TestCase
       # ["flattened.foo.bar.baz", 1354689632, {"value"=>"bazz"}]
       assert_equal     'flattened.foo.baz', events[3][0]
       assert_equal                  'bazz', events[3][2]['value']
+    end
+
+    test "keep_orignal_record" do
+      d = create_driver(%[
+        key                  foo
+        add_tag_prefix       flattened.
+        remove_tag_prefix    test.
+        parse_json           false
+        keep_original_record  true
+      ])
+
+      d.run(default_tag: "test") do
+        d.feed( 'prop1' => 'val1', 'foo' => {"bar" => "baz", "boo" => "boz"}, 'hoge' => 'fuga' )
+      end
+      events = d.events
+
+      assert_equal     'flattened.foo.bar', events[0][0]
+      assert_equal                  'val1', events[0][2]['prop1']
+      assert_equal                   'baz', events[0][2]['value']
+      assert_equal     'flattened.foo.boo', events[1][0]
+      assert_equal                  'val1', events[1][2]['prop1']
+      assert_equal                   'boz', events[1][2]['value']
     end
 
     test "parse_json is set false" do
