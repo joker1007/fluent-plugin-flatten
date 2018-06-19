@@ -54,15 +54,6 @@ class FlattenOutputTest < Test::Unit::TestCase
       assert_equal 'value_for_flat_key', d.instance.inner_key
       assert_equal false,         d.instance.parse_json
     end
-
-    test "mandatory parameters are missing" do
-      assert_raise(Fluent::ConfigError) do
-        create_driver(%[
-          key        foo
-          inner_key  value_for_keypath
-        ])
-      end
-    end
   end
 
   sub_test_case "flatten" do

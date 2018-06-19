@@ -20,19 +20,6 @@ module Fluent::Plugin
     desc "Keep original record"
     config_param :keep_original_record, :bool, default: false
 
-    def configure(conf)
-      super
-
-      if (
-          !remove_tag_prefix &&
-          !remove_tag_suffix &&
-          !add_tag_prefix    &&
-          !add_tag_suffix
-      )
-        raise Fluent::ConfigError, "out_flatten: At least one of remove_tag_prefix/remove_tag_suffix/add_tag_prefix/add_tag_suffix is required to be set"
-      end
-    end
-
     def multi_workers_ready?
       true
     end
